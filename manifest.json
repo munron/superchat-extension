@@ -1,0 +1,50 @@
+{
+  "manifest_version": 2,
+  "name": "スーパーチャット拡張",
+  "short_name": "スーパーチャット拡張",
+  "description": "配信者がスーパーチャットを確認しやすくなります",
+  "version": "1.0.0",
+  "icons": {
+    "16": "./16.png",
+    "48": "./48.png",
+    "128": "./128.png"
+  },
+  "browser_action": {
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/**",
+        "https://yt3.ggpht.com/**"
+      ],
+      "js": [
+        "./content-script.js",
+        "./popup.js"
+      ],
+      "css": [
+        "./content-script.css",
+        "./popup.css"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "scripts": [
+      "./background.js"
+    ]
+  },
+  "permissions": [
+    "tabs",
+    "notifications",
+    "storage",
+    "https://www.youtube.com/**",
+    "https://yt3.ggpht.com/**"
+  ],
+  "web_accessible_resources": [
+    "*.png",
+    "*.jpg",
+    "*.gif"
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}
