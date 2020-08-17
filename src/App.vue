@@ -4,7 +4,7 @@
       class="menu-default-chatview"
       v-bind:class="{ active: isDefaultView }"
       @click="addDefaultChatViewer"
-    >チャット</div>
+    >チャット🐻</div>
     <div
       class="menu-super-chatview"
       v-bind:class="{ active: !isDefaultView }"
@@ -87,8 +87,7 @@ export default class App extends Vue {
         "https://yt3.ggpht.com/-wk_BDVYFjXY/AAAAAAAAAAI/AAAAAAAAAAA/hvCOFG92f4s/s64-c-k-no-mo-rj-c0xffffff/photo.jpg",
       authorName: "テイラースイフト",
       purchaseAmount: "¥5000",
-      message:
-        "ばああああああああああかいういｆふぃおｈふぃｗｈふぉいｗｈふぉｗれげｒｇれｇｆれｆげｒえｒｆれｆれｆｗｒｆｗｒｆｒｗｆｗｒｒｗｆｗｒｆ",
+      message: "　",
       timestamp: "20:45",
       html: "",
       primaryColor: "rgba(255,202,40,1)",
@@ -152,10 +151,10 @@ export default class App extends Vue {
           console.log("差分検出");
           console.table(diffSuperChats);
           this.superChats.push(...diffSuperChats);
-          this.sendNotificationToDiscord(
-            "スパチャ拡張",
-            `${diffSuperChats[0].authorName}が${diffSuperChats[0].purchaseAmount}スパチャしたぞ`
-          );
+          //this.sendNotificationToDiscord(
+          //  "スパチャ拡張",
+          //  `${diffSuperChats[0].authorName}が${diffSuperChats[0].purchaseAmount}スパチャしたぞ`
+          //);
         }
         preSuperChats = curSuperChats;
       }
@@ -201,7 +200,7 @@ export default class App extends Vue {
         iconSrc: img?.src ?? "",
         authorName: authorName?.textContent ?? "",
         purchaseAmount: purchaseAmount?.textContent ?? "",
-        message: message?.textContent ?? "",
+        message: message?.textContent ?? "　",
         timestamp: timestamp?.textContent ?? "",
         html: el?.innerHTML ?? "",
         primaryColor:
@@ -370,6 +369,7 @@ export default class App extends Vue {
     height: auto;
     //padding: 5px;
     p {
+      min-height: 15px;
       margin: 5px auto;
       width: 95%;
     }
