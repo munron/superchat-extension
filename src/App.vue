@@ -24,18 +24,18 @@
         <div class="top" v-bind:style="{ 'background-color': superChat.primaryColor }">
           <img class="icon" :src="superChat.iconSrc" />
           <div class="info">
-            <p>{{superChat.authorName}}</p>
-            <p>{{superChat.purchaseAmount}}</p>
+            <p v-bind:style="{ color: superChat.authorNameColor}">{{superChat.authorName}}</p>
+            <p v-bind:style="{ color: superChat.headerColor}">{{superChat.purchaseAmount}}</p>
           </div>
           <div class="time">
-            <p>{{superChat.timestamp}}</p>
+            <p v-bind:style="{ color: superChat.timestamp}">{{superChat.timestamp}}</p>
           </div>
           <div v-if="superChat.checked" class="fav">
             <chrome-ex-img class="chrome-ex-img" :imagePath="'48.png'" />
           </div>
         </div>
         <div class="bottom" v-bind:style="{ 'background-color': superChat.secondaryColor }">
-          <p>{{superChat.message}}</p>
+          <p v-bind:style="{ color: superChat.messageColor}">{{superChat.message}}</p>
         </div>
       </div>
     </div>
@@ -47,6 +47,7 @@ import { Component, Vue } from "vue-property-decorator";
 import { sleep } from "./utils";
 import { SuperChat } from "./utils";
 import ChromeExImg from "@/components/ChromeExImg.vue";
+import moment from "moment";
 
 @Component({
   components: {
@@ -55,46 +56,43 @@ import ChromeExImg from "@/components/ChromeExImg.vue";
 })
 export default class App extends Vue {
   public mounted() {
-    console.log("mounted");
     this.start();
+    chrome.runtime.onMessage.addListener((message, sender, callback) => {
+      console.log(message);
+      if (message == "hashchange") {
+        this.isDefaultView = true;
+        this.initSuperChats();
+      }
+    });
+  }
+
+  public initSuperChats() {
+    this.superChats = [
+      {
+        iconSrc: chrome.extension.getURL("128.png"),
+        authorName: "スパチャ",
+        purchaseAmount: "♡♡♡♡",
+        message:
+          "スパチャコメント収集開始します！クリックすると既読マークが付きます😍",
+        timestamp: moment(new Date()).format("hh:mm"),
+        html: "",
+        primaryColor: "rgba(255,202,40,1)",
+        secondaryColor: "rgba(255,179,0,1)",
+        headerColor: "rgba(0,0,0,1)",
+        timestampColor: "rgba(0,0,0,1)",
+        authorNameColor: "rgba(0,0,0,1)",
+        messageColor: "rgba(0,0,0,1)",
+        checked: false,
+      },
+    ];
   }
 
   public isLoop = true;
   public isDefaultView = true;
-  public discordWebhookURL =
-    "https://discordapp.com/api/webhooks/744526622639652895/7_i1TP_KGB6th2IxhWaCoajNp4Oh_-HTpHBaX_eUmrmBdVrPL6MphAxesbzcB1YHl-qQ";
-
-  public flag = false;
   public superChatViewerWidth = 0;
   public superChatViewerHeight = 0;
   public superChatViewerMarginTop = 0;
-  public superChats: SuperChat[] = [
-    {
-      iconSrc:
-        "https://yt3.ggpht.com/-wk_BDVYFjXY/AAAAAAAAAAI/AAAAAAAAAAA/hvCOFG92f4s/s64-c-k-no-mo-rj-c0xffffff/photo.jpg",
-      authorName: "テイラースイフト",
-      purchaseAmount: "¥5000",
-      message:
-        "ばああああああああああかいういｆふぃおｈふぃｗｈふぉいｗｈふぉｗれげｒｇれｇｆれｆげｒえｒｆれｆれｆｗｒｆｗｒｆｒｗｆｗｒｒｗｆｗｒｆ",
-      timestamp: "20:45",
-      html: "",
-      primaryColor: "rgba(255,202,40,1)",
-      secondaryColor: "rgba(255,179,0,1)",
-      checked: false,
-    },
-    {
-      iconSrc:
-        "https://yt3.ggpht.com/-wk_BDVYFjXY/AAAAAAAAAAI/AAAAAAAAAAA/hvCOFG92f4s/s64-c-k-no-mo-rj-c0xffffff/photo.jpg",
-      authorName: "テイラースイフト",
-      purchaseAmount: "¥5000",
-      message: "　",
-      timestamp: "20:45",
-      html: "",
-      primaryColor: "rgba(255,202,40,1)",
-      secondaryColor: "rgba(255,179,0,1)",
-      checked: false,
-    },
-  ];
+  public superChats: SuperChat[] = [];
 
   public addDefaultChatViewer() {
     this.isDefaultView = true;
@@ -108,28 +106,7 @@ export default class App extends Vue {
       this.superChatViewerWidth = el.clientWidth;
       this.superChatViewerHeight = el.clientHeight;
       this.superChatViewerMarginTop = 0;
-      this.flag = !this.flag;
-      // console.log(chatEl.getBoundingClientRect().top);
-      // console.log(chatEl.clientWidth);
-      // console.log(chatEl.clientHeight);
-    } else {
-      return;
     }
-
-    // const chatEl = (document.getElementById(
-    //   "chatframe"
-    // ) as HTMLIFrameElement)?.contentWindow?.document?.querySelector("#chat");
-    // if (chatEl) {
-    //   this.superChatViewerWidth = chatEl.clientWidth;
-    //   this.superChatViewerHeight = chatEl.clientHeight;
-    //   this.superChatViewerMarginTop = chatEl.getBoundingClientRect().top;
-    //   this.flag = !this.flag;
-    //   // console.log(chatEl.getBoundingClientRect().top);
-    //   // console.log(chatEl.clientWidth);
-    //   // console.log(chatEl.clientHeight);
-    // } else {
-    //   return;
-    // }
   }
 
   public favoriteSuperChat(index: number) {
@@ -137,11 +114,13 @@ export default class App extends Vue {
   }
 
   public async start() {
+    this.initSuperChats();
     let preSuperChats = this.scrapeSuperChats() ?? [];
-    console.log(`start!! ${this.isLoop}`);
+    console.log(`スパチャ収集開始 ${this.isLoop}`);
     while (this.isLoop) {
       await sleep(3000);
       const curSuperChats = this.scrapeSuperChats() ?? [];
+      console.log(`スパチャ数 ${curSuperChats.length}`);
       if (curSuperChats.length > 0) {
         const diffSuperChats = this.getDiffSuperChats(
           preSuperChats,
@@ -151,10 +130,6 @@ export default class App extends Vue {
           console.log("差分検出");
           console.table(diffSuperChats);
           this.superChats.push(...diffSuperChats);
-          //this.sendNotificationToDiscord(
-          //  "スパチャ拡張",
-          //  `${diffSuperChats[0].authorName}が${diffSuperChats[0].purchaseAmount}スパチャしたぞ`
-          //);
         }
         preSuperChats = curSuperChats;
       }
@@ -211,11 +186,25 @@ export default class App extends Vue {
           (el as HTMLElement)?.style?.getPropertyValue(
             "--yt-live-chat-paid-message-secondary-color"
           ) ?? "",
+        headerColor:
+          (el as HTMLElement)?.style?.getPropertyValue(
+            "--yt-live-chat-paid-message-header-color"
+          ) ?? "",
+        authorNameColor:
+          (el as HTMLElement)?.style?.getPropertyValue(
+            "--yt-live-chat-paid-message-author-name-color"
+          ) ?? "",
+        timestampColor:
+          (el as HTMLElement)?.style?.getPropertyValue(
+            " --yt-live-chat-paid-message-timestamp-color"
+          ) ?? "",
+        messageColor:
+          (el as HTMLElement)?.style?.getPropertyValue(
+            "--yt-live-chat-paid-message-color"
+          ) ?? "",
         checked: false,
       } as SuperChat;
     });
-
-    //console.table(superchats);
     return superchats;
   }
 
@@ -236,27 +225,6 @@ export default class App extends Vue {
         console.log(chrome.runtime.lastError);
       }
     );
-  }
-
-  // 通知をdiscordに送信する
-  public sendNotificationToDiscord(username: string, content: string) {
-    const link = this.discordWebhookURL;
-    const message = { username: username, content: content };
-
-    postData(link, message)
-      .then((data) => console.log(data))
-      .catch((error) => console.error(error));
-
-    function postData(url = ``, data = {}) {
-      return fetch(url, {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }).then((response) => response.text());
-    }
   }
 }
 </script>
@@ -307,6 +275,10 @@ export default class App extends Vue {
   margin: 5px auto;
   // background-color: yellowgreen;
   border-radius: 4px;
+  p {
+    font-size: 14px;
+    // color: white;
+  }
 
   // display: flex;
   .top {
@@ -367,7 +339,8 @@ export default class App extends Vue {
     width: 100%;
     display: inline-table;
     height: auto;
-    //padding: 5px;
+    user-select: none;
+    // padding: 5px;
     p {
       min-height: 15px;
       margin: 5px auto;

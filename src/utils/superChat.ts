@@ -7,6 +7,10 @@ interface SuperChat {
     html: string,
     primaryColor: string,
     secondaryColor: string,
+    headerColor: string,
+    authorNameColor: string,
+    timestampColor: string,
+    messageColor: string,
     checked: boolean
 }
 
