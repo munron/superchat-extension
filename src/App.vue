@@ -64,6 +64,23 @@ export default class App extends Vue {
         this.initSuperChats();
       }
     });
+    window.addEventListener(
+      "resize",
+      () => {
+        const el = document.getElementById("chatframe") as HTMLIFrameElement;
+        if (el) {
+          this.superChatViewerWidth = el.clientWidth;
+          this.superChatViewerHeight = el.clientHeight;
+        }
+      },
+      false
+    );
+  }
+
+  //　お行儀が良いのでループを確実に止めておく
+  public beforeDestroy() {
+    this.isLoop = false;
+    this.superChats = [];
   }
 
   public initSuperChats() {
@@ -71,9 +88,9 @@ export default class App extends Vue {
       {
         iconSrc: chrome.extension.getURL("128.png"),
         authorName: "スパチャ",
-        purchaseAmount: "♡♡♡♡",
+        purchaseAmount: "♡♡♡",
         message:
-          "スパチャコメント収集開始します！クリックすると既読マークが付きます😍",
+          "スパチャコメントを収集してします！クリックすると既読マーク💗が付きます",
         timestamp: moment(new Date()).format("hh:mm"),
         html: "",
         primaryColor: "rgba(255,202,40,1)",
@@ -91,7 +108,6 @@ export default class App extends Vue {
   public isDefaultView = true;
   public superChatViewerWidth = 0;
   public superChatViewerHeight = 0;
-  public superChatViewerMarginTop = 0;
   public superChats: SuperChat[] = [];
 
   public addDefaultChatViewer() {
@@ -105,7 +121,6 @@ export default class App extends Vue {
     if (el) {
       this.superChatViewerWidth = el.clientWidth;
       this.superChatViewerHeight = el.clientHeight;
-      this.superChatViewerMarginTop = 0;
     }
   }
 
@@ -117,10 +132,11 @@ export default class App extends Vue {
     this.initSuperChats();
     let preSuperChats = this.scrapeSuperChats() ?? [];
     console.log(`スパチャ収集開始 ${this.isLoop}`);
+    //　ループ開始
     while (this.isLoop) {
       await sleep(3000);
       const curSuperChats = this.scrapeSuperChats() ?? [];
-      console.log(`スパチャ数 ${curSuperChats.length}`);
+      // console.log(`スパチャ数 ${curSuperChats.length}`);
       if (curSuperChats.length > 0) {
         const diffSuperChats = this.getDiffSuperChats(
           preSuperChats,
@@ -244,9 +260,11 @@ export default class App extends Vue {
   background-color: white;
   //background-color: aquamarine;
 }
+
 .active {
   background-color: rgb(255, 255, 255) !important;
 }
+
 .menu-default-chatview {
   background-color: #ccc;
   border-bottom: 1px solid rgb(224, 224, 224);
